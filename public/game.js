@@ -83,19 +83,26 @@ const SFX = {
   played: false,
 };
 const gnd = {
-  sprite: new Image(),
-  x: 0,
-  y: 0,
-  draw: function () {
-    this.y = parseFloat(scrn.height - this.sprite.height);
-    sctx.drawImage(this.sprite, this.x, this.y);
-  },
-  update: function () {
-    if (state.curr != state.Play) return;
-    this.x -= dx;
-    this.x = this.x % (this.sprite.width / 2);
-  },
-};
+    sprite: new Image(),
+    x: 0,
+    y: 0,
+    draw: function () {
+      this.y = parseFloat(scrn.height - this.sprite.height);
+      
+      // Draw two ground images side by side
+      sctx.drawImage(this.sprite, this.x, this.y);
+      sctx.drawImage(this.sprite, this.x + this.sprite.width, this.y);
+      
+      // If the first image is completely off screen, reset the position
+      if (this.x <= -this.sprite.width) {
+        this.x = 0;
+      }
+    },
+    update: function () {
+      if (state.curr != state.Play) return;
+      this.x -= dx; // Use the same speed as the pipes for consistency
+    },
+  };
 const bg = {
     sprite: new Image(),
     x: 0,
