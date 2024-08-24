@@ -21,9 +21,14 @@ body {
   background: #30c0df; /* Match the game background color */
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Squada One', cursive;
+  user-select: none;
 }
 
 @layer utilities {
@@ -32,14 +37,17 @@ body {
   }
 }
 
-/* Add your custom styles here */
-body {
-    font-family: 'Squada One', cursive;
-    user-select: none;
+#canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
-#canvas {
-    border: 1px solid #000;
-    display: block;
-    margin: 0 auto;
+main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

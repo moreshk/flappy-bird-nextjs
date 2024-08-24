@@ -4,22 +4,25 @@ const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
 
 function resizeCanvas() {
-  const maxWidth = 414;
-  const maxHeight = 736;
-  const windowRatio = window.innerWidth / window.innerHeight;
-  const gameRatio = maxWidth / maxHeight;
-
-  if (windowRatio < gameRatio) {
-    scrn.width = window.innerWidth;
-    scrn.height = window.innerWidth / gameRatio;
-  } else {
-    scrn.height = window.innerHeight;
-    scrn.width = window.innerHeight * gameRatio;
+    const maxWidth = 414;
+    const maxHeight = 736;
+    const windowRatio = window.innerWidth / window.innerHeight;
+    const gameRatio = maxWidth / maxHeight;
+  
+    if (windowRatio < gameRatio) {
+      scrn.width = window.innerWidth;
+      scrn.height = window.innerWidth / gameRatio;
+    } else {
+      scrn.height = window.innerHeight;
+      scrn.width = window.innerHeight * gameRatio;
+    }
+  
+    // Center the canvas
+    scrn.style.marginTop = `${(window.innerHeight - scrn.height) / 2}px`;
   }
-}
-
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+  
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 scrn.addEventListener("click", () => {
   switch (state.curr) {
     case state.getReady:
@@ -102,12 +105,13 @@ const bg = {
       let scaledWidth = this.sprite.width * scale;
       let scaledHeight = this.sprite.height * scale;
   
-      // Calculate the position to center the image vertically
+      // Calculate the position to center the image
+      let xOffset = (scrn.width - scaledWidth) / 2;
       let yOffset = (scrn.height - scaledHeight) / 2;
   
       // Draw two images side by side for seamless scrolling
-      sctx.drawImage(this.sprite, this.x, yOffset, scaledWidth, scaledHeight);
-      sctx.drawImage(this.sprite, this.x + scaledWidth, yOffset, scaledWidth, scaledHeight);
+      sctx.drawImage(this.sprite, this.x + xOffset, yOffset, scaledWidth, scaledHeight);
+      sctx.drawImage(this.sprite, this.x + xOffset + scaledWidth, yOffset, scaledWidth, scaledHeight);
   
       // Reset position when the first image is fully off-screen
       if (this.x <= -scaledWidth) {
