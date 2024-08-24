@@ -152,6 +152,7 @@ const bird = {
     sctx.restore();
   },
   update: function () {
+    this.updatePath();
     let r = parseFloat(this.animations[0].sprite.width) / 2;
     switch (state.curr) {
       case state.getReady:
@@ -223,6 +224,28 @@ const bird = {
         pipe.moved = false;
       }
     }
+  },
+  path: [],
+  maxPathLength: 20,
+
+  updatePath: function () {
+    this.path.unshift({ x: this.x, y: this.y });
+    if (this.path.length > this.maxPathLength) {
+      this.path.pop();
+    }
+  },
+
+  drawTail: function () {
+    sctx.beginPath();
+    sctx.moveTo(this.x, this.y);
+    for (let i = 0; i < this.path.length; i++) {
+      let point = this.path[i];
+      let x = this.x - (i * 3); // Move each point 3 pixels to the left
+      sctx.lineTo(x, point.y);
+    }
+    sctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    sctx.lineWidth = 3;
+    sctx.stroke();
   },
 };
 const UI = {
@@ -337,6 +360,7 @@ function gameLoop() {
     sctx.fillRect(0, 0, scrn.width, scrn.height);
     bg.draw();
     pipe.draw();
+    bird.drawTail(); // Add this line
     bird.draw();
     gnd.draw();
     UI.draw();
