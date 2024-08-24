@@ -20,8 +20,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex justify-center items-center min-h-screen">
-      <canvas id="canvas" width="276" height="414"></canvas>
+    <main className="flex flex-col items-center justify-center min-h-screen w-full">
+      <canvas id="canvas" className="w-full h-auto max-w-[414px] max-h-[736px]"></canvas>
     </main>
   );
 }

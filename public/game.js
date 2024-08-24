@@ -2,6 +2,24 @@ const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
+
+function resizeCanvas() {
+  const maxWidth = 414;
+  const maxHeight = 736;
+  const windowRatio = window.innerWidth / window.innerHeight;
+  const gameRatio = maxWidth / maxHeight;
+
+  if (windowRatio < gameRatio) {
+    scrn.width = window.innerWidth;
+    scrn.height = window.innerWidth / gameRatio;
+  } else {
+    scrn.height = window.innerHeight;
+    scrn.width = window.innerHeight * gameRatio;
+  }
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 scrn.addEventListener("click", () => {
   switch (state.curr) {
     case state.getReady:
@@ -76,14 +94,30 @@ const gnd = {
   },
 };
 const bg = {
-  sprite: new Image(),
-  x: 0,
-  y: 0,
-  draw: function () {
-    y = parseFloat(scrn.height - this.sprite.height);
-    sctx.drawImage(this.sprite, this.x, y);
-  },
-};
+    sprite: new Image(),
+    x: 0,
+    y: 0,
+    draw: function () {
+      let scale = Math.max(scrn.width / this.sprite.width, scrn.height / this.sprite.height);
+      let scaledWidth = this.sprite.width * scale;
+      let scaledHeight = this.sprite.height * scale;
+  
+      // Calculate the position to center the image vertically
+      let yOffset = (scrn.height - scaledHeight) / 2;
+  
+      // Draw two images side by side for seamless scrolling
+      sctx.drawImage(this.sprite, this.x, yOffset, scaledWidth, scaledHeight);
+      sctx.drawImage(this.sprite, this.x + scaledWidth, yOffset, scaledWidth, scaledHeight);
+  
+      // Reset position when the first image is fully off-screen
+      if (this.x <= -scaledWidth) {
+        this.x = 0;
+      }
+    },
+    update: function() {
+      this.x -= 0.5; // Adjust this value to change scroll speed
+    }
+  };
 const pipe = {
     top: { sprite: new Image() },
     bot: { sprite: new Image() },
@@ -353,6 +387,7 @@ function gameLoop() {
     gnd.update();
     pipe.update();
     UI.update();
+    bg.update();
   }
   
   function draw() {
@@ -367,3 +402,4 @@ function gameLoop() {
   }
   
   setInterval(gameLoop, 20);
+  resizeCanvas();
