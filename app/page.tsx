@@ -109,8 +109,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="w-full h-screen flex items-center justify-center relative bg-black">
-      <canvas id="canvas"></canvas>
+    <main className="w-full h-screen flex items-center justify-center bg-black overflow-hidden">
+      <canvas id="canvas" className="w-full h-full object-contain"></canvas>
       {/* Debug info - controlled by environment variable */}
       {process.env.NEXT_PUBLIC_SHOW_DEBUG === 'true' && (
         <div className="fixed top-0 left-0 bg-red-500 p-2 m-2 rounded shadow-md z-50 max-w-xs overflow-auto max-h-screen">
