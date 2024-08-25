@@ -1,7 +1,7 @@
-// dummy
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 // Define the interface for user data
 interface UserData {
@@ -19,13 +19,37 @@ declare global {
   }
 }
 
+async function upsertPlayer(userData: UserData) {
+  const { data, error } = await supabase
+    .from('players')
+    .upsert({
+      username: userData.username,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      telegram_id: userData.id
+    }, {
+      onConflict: 'telegram_id'
+    })
+    .select();
+
+  if (error) {
+    console.error('Error upserting player:', error);
+    throw error;
+  } else {
+    console.log('Player upserted successfully:', data);
+    return data;
+  }
+}
+
 export default function Home() {
   const scriptLoaded = useRef(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkTelegramObject = () => {
+    const checkTelegramObject = async () => {
       const debugMessages: string[] = [];
 
       if (window.Telegram) {
@@ -41,6 +65,20 @@ export default function Home() {
               const user = webApp.initDataUnsafe.user as UserData;
               setUserData(user);
               debugMessages.push("User data retrieved successfully");
+              
+              // Upsert player data
+              setIsLoading(true);
+              setError(null);
+              try {
+                await upsertPlayer(user);
+                debugMessages.push("Player data saved successfully");
+              } catch (error) {
+                console.error('Error upserting player:', error);
+                setError('Failed to save player data');
+                debugMessages.push("Failed to save player data");
+              } finally {
+                setIsLoading(false);
+              }
             } else {
               debugMessages.push("User data does not exist");
             }
@@ -80,6 +118,8 @@ export default function Home() {
           {debugInfo.map((message, index) => (
             <p key={index} className="text-white text-sm">{message}</p>
           ))}
+          {isLoading && <p className="text-white text-sm">Saving player data...</p>}
+          {error && <p className="text-white text-sm bg-red-700 p-1 rounded">{error}</p>}
         </div>
       )}
     </main>
