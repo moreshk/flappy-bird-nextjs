@@ -4,10 +4,8 @@ const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
 
 function resizeCanvas() {
-    const maxWidth = 414;
-    const maxHeight = 736;
     const windowRatio = window.innerWidth / window.innerHeight;
-    const gameRatio = maxWidth / maxHeight;
+    const gameRatio = 414 / 736; // Original game aspect ratio
   
     if (windowRatio < gameRatio) {
       scrn.width = window.innerWidth;
@@ -18,7 +16,9 @@ function resizeCanvas() {
     }
   
     // Center the canvas
-    scrn.style.marginTop = `${(window.innerHeight - scrn.height) / 2}px`;
+    scrn.style.position = 'absolute';
+    scrn.style.left = `${(window.innerWidth - scrn.width) / 2}px`;
+    scrn.style.top = `${(window.innerHeight - scrn.height) / 2}px`;
   }
   
   resizeCanvas();

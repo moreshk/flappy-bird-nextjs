@@ -16,9 +16,16 @@
   }
 }
 
+
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
 body {
   color: rgb(var(--foreground-rgb));
-  background: #30c0df; /* Match the game background color */
+  background: #30c0df;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -31,23 +38,18 @@ body {
   user-select: none;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 #canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
   display: block;
 }
 
 main {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
 }
