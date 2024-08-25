@@ -399,6 +399,7 @@ function gameLoop() {
     pipe.update();
     UI.update();
     bg.update();
+    updateSpeed(); // Add this line
   }
   
   function draw() {
@@ -412,5 +413,12 @@ function gameLoop() {
     UI.draw();
   }
   
+
+// Add the new function here
+function updateSpeed() {
+    // Increase speed every 10 points, up to a maximum
+    dx = Math.min(2 + Math.floor(UI.score.curr / 10) * 0.5, 5);
+}
+
   setInterval(gameLoop, 20);
   resizeCanvas();
