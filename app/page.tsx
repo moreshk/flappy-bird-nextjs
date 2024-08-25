@@ -71,7 +71,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="w-full h-screen flex items-center justify-center relative bg-black bg-opacity-50">
+    <main className="w-full h-screen flex items-center justify-center relative bg-black">
       <canvas id="canvas"></canvas>
       {/* Debug info - controlled by environment variable */}
       {process.env.NEXT_PUBLIC_SHOW_DEBUG === 'true' && (

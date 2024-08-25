@@ -25,7 +25,7 @@
 }
 body {
   color: rgb(var(--foreground-rgb));
-  background: #30c0df;
+  background: #000000;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -41,7 +41,7 @@ body {
 #canvas {
   width: 100vw;
   height: 100vh;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -51,5 +51,5 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #000000;
 }
