@@ -47,12 +47,15 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="w-full h-screen flex items-center justify-center">
+    <main className="w-full h-screen flex items-center justify-center relative">
       <canvas id="canvas"></canvas>
+      <div className="fixed top-0 left-0 bg-red-500 p-2 m-2 rounded shadow-md z-50">
+        <p className="text-white">Debug: Always Visible</p>
+      </div>
       {userData && (
-        <div className="absolute top-0 left-0 bg-white bg-opacity-50 p-2 m-2 rounded">
-          <p>User: {userData.first_name} {userData.last_name}</p>
-          <p>ID: {userData.id}</p>
+        <div className="fixed top-10 left-0 bg-white bg-opacity-75 p-2 m-2 rounded shadow-md z-50">
+          <p className="text-black font-bold">User: {userData.first_name} {userData.last_name}</p>
+          <p className="text-black">ID: {userData.id}</p>
         </div>
       )}
     </main>
