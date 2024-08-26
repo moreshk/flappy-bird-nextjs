@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { sql } from '@supabase/supabase-js';
 
 // Define the interface for user data
 interface UserData {
@@ -17,6 +16,7 @@ interface UserData {
 declare global {
   interface Window {
     Telegram: any;
+    upsertPlayer: (score: number) => Promise<void>;
   }
 }
 
@@ -28,9 +28,9 @@ async function upsertPlayer(userData: UserData, score: number) {
       first_name: userData.first_name,
       last_name: userData.last_name,
       telegram_id: userData.id,
-      total_score: sql`total_score + ${score}`,
-      attempts_count: sql`attempts_count + 1`,
-      high_score: sql`GREATEST(high_score, ${score})`
+      total_score: score,
+      attempts_count: 1,
+      high_score: score
     }, {
       onConflict: 'telegram_id'
     })
@@ -45,6 +45,22 @@ async function upsertPlayer(userData: UserData, score: number) {
   }
 }
 
+async function updatePlayerScores(telegramId: number, score: number) {
+  const { data, error } = await supabase
+    .rpc('update_player_scores', {
+      p_telegram_id: telegramId,
+      p_score: score
+    });
+
+  if (error) {
+    console.error('Error updating player scores:', error);
+    throw error;
+  } else {
+    console.log('Player scores updated successfully:', data);
+    return data;
+  }
+}
+
 export default function Home() {
   const scriptLoaded = useRef(false);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -52,12 +68,20 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Add this useEffect hook
+  async function handlePlayerUpdate(userData: UserData, score: number) {
+    try {
+      await upsertPlayer(userData, score);
+      await updatePlayerScores(userData.id, score);
+    } catch (error) {
+      console.error('Error updating player data:', error);
+    }
+  }
+
   useEffect(() => {
     if (userData) {
       window.upsertPlayer = async (score: number) => {
         try {
-          await upsertPlayer(userData, score);
+          await handlePlayerUpdate(userData, score);
         } catch (error) {
           console.error('Error updating player data:', error);
         }
@@ -87,7 +111,7 @@ export default function Home() {
               setIsLoading(true);
               setError(null);
               try {
-                await upsertPlayer(user);
+                await upsertPlayer(user, 0);
                 debugMessages.push("Player data saved successfully");
               } catch (error) {
                 console.error('Error upserting player:', error);
