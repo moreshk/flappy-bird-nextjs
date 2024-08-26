@@ -28,9 +28,6 @@ async function upsertPlayer(userData: UserData, score: number) {
       first_name: userData.first_name,
       last_name: userData.last_name,
       telegram_id: userData.id,
-      total_score: score,
-      attempts_count: 1,
-      high_score: score
     }, {
       onConflict: 'telegram_id'
     })
@@ -76,6 +73,7 @@ export default function Home() {
       console.error('Error updating player data:', error);
     }
   }
+
 
   useEffect(() => {
     if (userData) {
