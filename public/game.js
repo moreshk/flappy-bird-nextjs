@@ -421,8 +421,11 @@ function updateSpeed() {
     dx = Math.min(2 + Math.floor(UI.score.curr / 10) * 0.5, 5);
 }
 
+let gameOverHandled = false;
+
 async function handleGameOver() {
-  if (state.curr === state.gameOver) {
+  if (state.curr === state.gameOver && !gameOverHandled) {
+    gameOverHandled = true;
     const score = UI.score.curr;
     try {
       await window.upsertPlayer(score);
@@ -430,6 +433,8 @@ async function handleGameOver() {
     } catch (error) {
       console.error('Error updating score:', error);
     }
+  } else if (state.curr !== state.gameOver) {
+    gameOverHandled = false;
   }
 }
 
