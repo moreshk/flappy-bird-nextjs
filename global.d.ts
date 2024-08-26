@@ -1,3 +1,4 @@
 interface Window {
-    // Add any global variables used in game.js here
-  }
+  Telegram: any;
+  upsertPlayer: (score: number) => Promise<void>;
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { sql } from '@supabase/supabase-js';
 
 // Define the interface for user data
 interface UserData {
@@ -19,14 +20,17 @@ declare global {
   }
 }
 
-async function upsertPlayer(userData: UserData) {
+async function upsertPlayer(userData: UserData, score: number) {
   const { data, error } = await supabase
     .from('players')
     .upsert({
       username: userData.username,
       first_name: userData.first_name,
       last_name: userData.last_name,
-      telegram_id: userData.id
+      telegram_id: userData.id,
+      total_score: sql`total_score + ${score}`,
+      attempts_count: sql`attempts_count + 1`,
+      high_score: sql`GREATEST(high_score, ${score})`
     }, {
       onConflict: 'telegram_id'
     })
@@ -47,6 +51,19 @@ export default function Home() {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Add this useEffect hook
+  useEffect(() => {
+    if (userData) {
+      window.upsertPlayer = async (score: number) => {
+        try {
+          await upsertPlayer(userData, score);
+        } catch (error) {
+          console.error('Error updating player data:', error);
+        }
+      };
+    }
+  }, [userData]);
 
   useEffect(() => {
     const checkTelegramObject = async () => {

@@ -391,6 +391,7 @@ function gameLoop() {
     update();
     draw();
     frames++;
+    handleGameOver();
   }
   
   function update() {
@@ -418,6 +419,18 @@ function gameLoop() {
 function updateSpeed() {
     // Increase speed every 10 points, up to a maximum
     dx = Math.min(2 + Math.floor(UI.score.curr / 10) * 0.5, 5);
+}
+
+async function handleGameOver() {
+  if (state.curr === state.gameOver) {
+    const score = UI.score.curr;
+    try {
+      await window.upsertPlayer(score);
+      console.log('Score updated successfully');
+    } catch (error) {
+      console.error('Error updating score:', error);
+    }
+  }
 }
 
   setInterval(gameLoop, 20);
