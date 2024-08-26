@@ -1,4 +1,3 @@
-// dummy
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
@@ -65,6 +64,21 @@ export default function Home() {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [highScore, setHighScore] = useState<number>(0);
+
+  const fetchHighScore = async (telegramId: number) => {
+    const { data, error } = await supabase
+      .from('players')
+      .select('high_score')
+      .eq('telegram_id', telegramId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching high score:', error);
+    } else if (data) {
+      setHighScore(data.high_score);
+    }
+  };
 
   async function handlePlayerUpdate(userData: UserData, score: number) {
     try {
@@ -75,16 +89,17 @@ export default function Home() {
     }
   }
 
-
   useEffect(() => {
     if (userData) {
       window.upsertPlayer = async (score: number) => {
         try {
           await handlePlayerUpdate(userData, score);
+          await fetchHighScore(userData.id);
         } catch (error) {
           console.error('Error updating player data:', error);
         }
       };
+      fetchHighScore(userData.id);
     }
   }, [userData]);
 
@@ -143,10 +158,14 @@ export default function Home() {
       const script = document.createElement('script');
       script.src = '/game.js';
       script.async = true;
+      script.onload = () => {
+        // Dispatch a custom event with the high score
+        window.dispatchEvent(new CustomEvent('highScoreLoaded', { detail: highScore }));
+      };
       document.body.appendChild(script);
       scriptLoaded.current = true;
     }
-  }, []);
+  }, [highScore]);
 
   return (
     <main className="w-full h-screen flex items-center justify-center bg-black overflow-hidden">

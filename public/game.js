@@ -2,27 +2,35 @@ const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
+// At the beginning of the file
+let highScore = 0;
+
+// Listen for the highScoreLoaded event
+window.addEventListener('highScoreLoaded', (event) => {
+  highScore = event.detail;
+  console.log('High score loaded:', highScore);
+});
 
 function resizeCanvas() {
-    const windowRatio = window.innerWidth / window.innerHeight;
-    const gameRatio = 414 / 736; // Original game aspect ratio
-  
-    if (windowRatio < gameRatio) {
-      scrn.width = window.innerWidth;
-      scrn.height = window.innerWidth / gameRatio;
-    } else {
-      scrn.height = window.innerHeight;
-      scrn.width = window.innerHeight * gameRatio;
-    }
-  
-    // Center the canvas
-    scrn.style.position = 'absolute';
-    scrn.style.left = `${(window.innerWidth - scrn.width) / 2}px`;
-    scrn.style.top = `${(window.innerHeight - scrn.height) / 2}px`;
+  const windowRatio = window.innerWidth / window.innerHeight;
+  const gameRatio = 414 / 736; // Original game aspect ratio
+
+  if (windowRatio < gameRatio) {
+    scrn.width = window.innerWidth;
+    scrn.height = window.innerWidth / gameRatio;
+  } else {
+    scrn.height = window.innerHeight;
+    scrn.width = window.innerHeight * gameRatio;
   }
-  
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+
+  // Center the canvas
+  scrn.style.position = "absolute";
+  scrn.style.left = `${(window.innerWidth - scrn.width) / 2}px`;
+  scrn.style.top = `${(window.innerHeight - scrn.height) / 2}px`;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 scrn.addEventListener("click", () => {
   switch (state.curr) {
     case state.getReady:
@@ -33,12 +41,14 @@ scrn.addEventListener("click", () => {
       bird.flap();
       break;
     case state.gameOver:
-      state.curr = state.getReady;
-      bird.speed = 0;
-      bird.y = 100;
-      pipe.pipes = [];
-      UI.score.curr = 0;
-      SFX.played = false;
+      sctx.lineWidth = "2";
+      sctx.font = "40px Squada One";
+      let sc = `SCORE :     ${this.score.curr}`;
+      let bs = `BEST  :     ${Math.max(this.score.curr, highScore)}`;
+      sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
+      sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
+      sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
+      sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
       break;
   }
 });
@@ -83,96 +93,111 @@ const SFX = {
   played: false,
 };
 const gnd = {
-    sprite: new Image(),
-    x: 0,
-    y: 0,
-    draw: function () {
-      this.y = parseFloat(scrn.height - this.sprite.height);
-      
-      // Draw two ground images side by side
-      sctx.drawImage(this.sprite, this.x, this.y);
-      sctx.drawImage(this.sprite, this.x + this.sprite.width, this.y);
-      
-      // If the first image is completely off screen, reset the position
-      if (this.x <= -this.sprite.width) {
-        this.x = 0;
-      }
-    },
-    update: function () {
-      if (state.curr != state.Play) return;
-      this.x -= dx; // Use the same speed as the pipes for consistency
-    },
-  };
-const bg = {
-    sprite: new Image(),
-    x: 0,
-    y: 0,
-    draw: function () {
-      let scale = Math.max(scrn.width / this.sprite.width, scrn.height / this.sprite.height);
-      let scaledWidth = this.sprite.width * scale;
-      let scaledHeight = this.sprite.height * scale;
-  
-      // Calculate the position to center the image
-      let xOffset = (scrn.width - scaledWidth) / 2;
-      let yOffset = (scrn.height - scaledHeight) / 2;
-  
-      // Draw two images side by side for seamless scrolling
-      sctx.drawImage(this.sprite, this.x + xOffset, yOffset, scaledWidth, scaledHeight);
-      sctx.drawImage(this.sprite, this.x + xOffset + scaledWidth, yOffset, scaledWidth, scaledHeight);
-  
-      // Reset position when the first image is fully off-screen
-      if (this.x <= -scaledWidth) {
-        this.x = 0;
-      }
-    },
-    update: function() {
-      this.x -= 0.5; // Adjust this value to change scroll speed
+  sprite: new Image(),
+  x: 0,
+  y: 0,
+  draw: function () {
+    this.y = parseFloat(scrn.height - this.sprite.height);
+
+    // Draw two ground images side by side
+    sctx.drawImage(this.sprite, this.x, this.y);
+    sctx.drawImage(this.sprite, this.x + this.sprite.width, this.y);
+
+    // If the first image is completely off screen, reset the position
+    if (this.x <= -this.sprite.width) {
+      this.x = 0;
     }
-  };
+  },
+  update: function () {
+    if (state.curr != state.Play) return;
+    this.x -= dx; // Use the same speed as the pipes for consistency
+  },
+};
+const bg = {
+  sprite: new Image(),
+  x: 0,
+  y: 0,
+  draw: function () {
+    let scale = Math.max(
+      scrn.width / this.sprite.width,
+      scrn.height / this.sprite.height
+    );
+    let scaledWidth = this.sprite.width * scale;
+    let scaledHeight = this.sprite.height * scale;
+
+    // Calculate the position to center the image
+    let xOffset = (scrn.width - scaledWidth) / 2;
+    let yOffset = (scrn.height - scaledHeight) / 2;
+
+    // Draw two images side by side for seamless scrolling
+    sctx.drawImage(
+      this.sprite,
+      this.x + xOffset,
+      yOffset,
+      scaledWidth,
+      scaledHeight
+    );
+    sctx.drawImage(
+      this.sprite,
+      this.x + xOffset + scaledWidth,
+      yOffset,
+      scaledWidth,
+      scaledHeight
+    );
+
+    // Reset position when the first image is fully off-screen
+    if (this.x <= -scaledWidth) {
+      this.x = 0;
+    }
+  },
+  update: function () {
+    this.x -= 0.5; // Adjust this value to change scroll speed
+  },
+};
 const pipe = {
-    top: { sprite: new Image() },
-    bot: { sprite: new Image() },
-    gap: 200, // Start with a large gap
-    moved: true,
-    pipes: [],
-    minGap: 65, // Minimum gap size
-    draw: function () {
-      for (let i = 0; i < this.pipes.length; i++) {
-        let p = this.pipes[i];
-        sctx.drawImage(this.top.sprite, p.x, p.y);
-        sctx.drawImage(
-          this.bot.sprite,
-          p.x,
-          p.y + parseFloat(this.top.sprite.height) + this.gap
-        );
-      }
-    },
-    update: function () {
-      if (state.curr != state.Play) return;
-      if (frames % 100 == 0) {
-        this.pipes.push({
-          x: parseFloat(scrn.width),
-          y: -210 * Math.min(Math.random() + 1, 1.8),
-        });
-      }
-      this.pipes.forEach((pipe) => {
-        pipe.x -= dx;
+  top: { sprite: new Image() },
+  bot: { sprite: new Image() },
+  gap: 200, // Start with a large gap
+  moved: true,
+  pipes: [],
+  minGap: 65, // Minimum gap size
+  draw: function () {
+    for (let i = 0; i < this.pipes.length; i++) {
+      let p = this.pipes[i];
+      sctx.drawImage(this.top.sprite, p.x, p.y);
+      sctx.drawImage(
+        this.bot.sprite,
+        p.x,
+        p.y + parseFloat(this.top.sprite.height) + this.gap
+      );
+    }
+  },
+  update: function () {
+    if (state.curr != state.Play) return;
+    if (frames % 100 == 0) {
+      this.pipes.push({
+        x: parseFloat(scrn.width),
+        y: -210 * Math.min(Math.random() + 1, 1.8),
       });
-  
-      if (this.pipes.length && this.pipes[0].x < -this.top.sprite.width) {
-        this.pipes.shift();
-        this.moved = true;
-      }
-  
-      // Update gap size based on score
-      this.updateDifficulty();
-    },
-    updateDifficulty: function() {
-      // Gradually decrease gap size as score increases
-      let newGap = 200 - Math.floor(UI.score.curr / 5) * 5;
-      this.gap = Math.max(newGap, this.minGap);
-    },
-  };
+    }
+    this.pipes.forEach((pipe) => {
+      pipe.x -= dx;
+    });
+
+    if (this.pipes.length && this.pipes[0].x < -this.top.sprite.width) {
+      this.pipes.shift();
+      this.moved = true;
+    }
+
+    // Update gap size based on score
+    this.updateDifficulty();
+  },
+  updateDifficulty: function () {
+    // Gradually decrease gap size as score increases
+    let newGap = 200 - Math.floor(UI.score.curr / 5) * 5;
+    this.gap = Math.max(newGap, this.minGap);
+  },
+};
 const bird = {
   animations: [
     { sprite: new Image() },
@@ -285,90 +310,78 @@ const bird = {
     sctx.moveTo(this.x, this.y);
     for (let i = 0; i < this.path.length; i++) {
       let point = this.path[i];
-      let x = this.x - (i * 3); // Move each point 3 pixels to the left
+      let x = this.x - i * 3; // Move each point 3 pixels to the left
       sctx.lineTo(x, point.y);
     }
-    sctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    sctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
     sctx.lineWidth = 3;
     sctx.stroke();
   },
 };
 const UI = {
-    getReady: { sprite: new Image() },
-    gameOver: { sprite: new Image() },
-    tap: [{ sprite: new Image() }, { sprite: new Image() }],
-    score: {
-      curr: 0,
-      best: 0,
-    },
-    x: 0,
-    y: 0,
-    tx: 0,
-    ty: 0,
-    frame: 0,
-    draw: function () {
-      switch (state.curr) {
-        case state.getReady:
-          this.y = parseFloat(scrn.height - this.getReady.sprite.height) / 2;
-          this.x = parseFloat(scrn.width - this.getReady.sprite.width) / 2;
-          this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
-          this.ty =
-            this.y + this.getReady.sprite.height - this.tap[0].sprite.height;
-          sctx.drawImage(this.getReady.sprite, this.x, this.y);
-          sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
-          break;
-        case state.gameOver:
-          this.y = parseFloat(scrn.height - this.gameOver.sprite.height) / 2;
-          this.x = parseFloat(scrn.width - this.gameOver.sprite.width) / 2;
-          this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
-          this.ty =
-            this.y + this.gameOver.sprite.height - this.tap[0].sprite.height;
-          sctx.drawImage(this.gameOver.sprite, this.x, this.y);
-          sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
-          break;
-      }
-      this.drawScore();
-    },
-    drawScore: function () {
-      sctx.fillStyle = "#FFFFFF";
-      sctx.strokeStyle = "#000000";
-      switch (state.curr) {
-        case state.Play:
-          sctx.lineWidth = "2";
-          sctx.font = "35px Squada One";
-          sctx.fillText(this.score.curr, scrn.width / 2 - 5, 50);
-          sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
-          // Update difficulty when score changes
-          pipe.updateDifficulty();
-          break;
-        case state.gameOver:
-          sctx.lineWidth = "2";
-          sctx.font = "40px Squada One";
-          let sc = `SCORE :     ${this.score.curr}`;
-          try {
-            this.score.best = Math.max(
-              this.score.curr,
-              localStorage.getItem("best")
-            );
-            localStorage.setItem("best", this.score.best);
-            let bs = `BEST  :     ${this.score.best}`;
-            sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
-            sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
-            sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-            sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-          } catch (e) {
-            sctx.fillText(sc, scrn.width / 2 - 85, scrn.height / 2 + 15);
-            sctx.strokeText(sc, scrn.width / 2 - 85, scrn.height / 2 + 15);
-          }
-          break;
-      }
-    },
-    update: function () {
-      if (state.curr == state.Play) return;
-      this.frame += frames % 10 == 0 ? 1 : 0;
-      this.frame = this.frame % this.tap.length;
-    },
-  };
+  getReady: { sprite: new Image() },
+  gameOver: { sprite: new Image() },
+  tap: [{ sprite: new Image() }, { sprite: new Image() }],
+  score: {
+    curr: 0,
+    best: 0,
+  },
+  x: 0,
+  y: 0,
+  tx: 0,
+  ty: 0,
+  frame: 0,
+  draw: function () {
+    switch (state.curr) {
+      case state.getReady:
+        this.y = parseFloat(scrn.height - this.getReady.sprite.height) / 2;
+        this.x = parseFloat(scrn.width - this.getReady.sprite.width) / 2;
+        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
+        this.ty =
+          this.y + this.getReady.sprite.height - this.tap[0].sprite.height;
+        sctx.drawImage(this.getReady.sprite, this.x, this.y);
+        sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
+        break;
+      case state.gameOver:
+        this.y = parseFloat(scrn.height - this.gameOver.sprite.height) / 2;
+        this.x = parseFloat(scrn.width - this.gameOver.sprite.width) / 2;
+        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
+        this.ty =
+          this.y + this.gameOver.sprite.height - this.tap[0].sprite.height;
+        sctx.drawImage(this.gameOver.sprite, this.x, this.y);
+        sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
+        break;
+    }
+    this.drawScore();
+  },
+  drawScore: function () {
+    sctx.fillStyle = "#FFFFFF";
+    sctx.strokeStyle = "#000000";
+    switch (state.curr) {
+      case state.Play:
+        sctx.lineWidth = "2";
+        sctx.font = "35px Squada One";
+        sctx.fillText(this.score.curr, scrn.width / 2 - 5, 50);
+        sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
+        break;
+      case state.gameOver:
+        sctx.lineWidth = "2";
+        sctx.font = "40px Squada One";
+        let sc = `SCORE :     ${this.score.curr}`;
+        let bs = `BEST  :     ${Math.max(this.score.curr, highScore)}`;
+        sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
+        sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
+        sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
+        sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
+        break;
+    }
+  },
+  update: function () {
+    if (state.curr == state.Play) return;
+    this.frame += frames % 10 == 0 ? 1 : 0;
+    this.frame = this.frame % this.tap.length;
+  },
+};
 gnd.sprite.src = "/img/ground.png";
 bg.sprite.src = "/img/BG.png";
 pipe.top.sprite.src = "/img/toppipe.png";
@@ -388,39 +401,39 @@ SFX.hit.src = "sfx/hit.wav";
 SFX.die.src = "sfx/die.wav";
 
 function gameLoop() {
-    update();
-    draw();
-    frames++;
-    handleGameOver();
-  }
-  
-  function update() {
-    bird.update();
-    gnd.update();
-    pipe.update();
-    UI.update();
-    bg.update();
-    updateSpeed(); // Add this line
-  }
-  
-  function draw() {
-    sctx.fillStyle = "#30c0df";
-    sctx.fillRect(0, 0, scrn.width, scrn.height);
-    bg.draw();
-    pipe.draw();
-    bird.drawTail(); // Add this line
-    bird.draw();
-    gnd.draw();
-    UI.draw();
-  }
-  
+  update();
+  draw();
+  frames++;
+  handleGameOver();
+}
+
+function update() {
+  bird.update();
+  gnd.update();
+  pipe.update();
+  UI.update();
+  bg.update();
+  updateSpeed(); // Add this line
+}
+
+function draw() {
+  sctx.fillStyle = "#30c0df";
+  sctx.fillRect(0, 0, scrn.width, scrn.height);
+  bg.draw();
+  pipe.draw();
+  bird.drawTail(); // Add this line
+  bird.draw();
+  gnd.draw();
+  UI.draw();
+}
 
 // Add the new function here
 function updateSpeed() {
-    // Increase speed every 10 points, up to a maximum
-    dx = Math.min(2 + Math.floor(UI.score.curr / 10) * 0.5, 5);
+  // Increase speed every 10 points, up to a maximum
+  dx = Math.min(2 + Math.floor(UI.score.curr / 10) * 0.5, 5);
 }
 
+// Update the handleGameOver function
 let gameOverHandled = false;
 
 async function handleGameOver() {
@@ -430,6 +443,8 @@ async function handleGameOver() {
     try {
       await window.upsertPlayer(score);
       console.log('Score updated successfully');
+      // After updating the score, we should update the highScore
+      highScore = Math.max(highScore, score);
     } catch (error) {
       console.error('Error updating score:', error);
     }
@@ -438,5 +453,5 @@ async function handleGameOver() {
   }
 }
 
-  setInterval(gameLoop, 20);
-  resizeCanvas();
+setInterval(gameLoop, 20);
+resizeCanvas();
