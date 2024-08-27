@@ -354,14 +354,17 @@ const UI = {
       case state.gameOver:
         this.y = parseFloat(scrn.height - this.gameOver.sprite.height) / 2;
         this.x = parseFloat(scrn.width - this.gameOver.sprite.width) / 2;
-        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
-        this.ty =
-          this.y + this.gameOver.sprite.height - this.tap[0].sprite.height;
         sctx.drawImage(this.gameOver.sprite, this.x, this.y);
+        this.drawScore();
+        // Draw tap icons below the scores
+        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
+        this.ty = this.y + this.gameOver.sprite.height + 100; // Adjust this value as needed
         sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
         break;
     }
-    this.drawScore();
+    if (state.curr !== state.gameOver) {
+      this.drawScore();
+    }
   },
   drawScore: function () {
     sctx.fillStyle = "#FFFFFF";
@@ -380,14 +383,18 @@ const UI = {
         let bs = `BEST  :     ${highScore}`;
         let ts = `TOTAL :     ${totalScore}`;
         let ac = `TRIES :     ${attemptsCount}`;
-        sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
-        sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
-        sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-        sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-        sctx.fillText(ts, scrn.width / 2 - 80, scrn.height / 2 + 60);
-        sctx.strokeText(ts, scrn.width / 2 - 80, scrn.height / 2 + 60);
-        sctx.fillText(ac, scrn.width / 2 - 80, scrn.height / 2 + 90);
-        sctx.strokeText(ac, scrn.width / 2 - 80, scrn.height / 2 + 90);
+        let yPos = scrn.height / 2; // Start higher up
+        sctx.fillText(sc, scrn.width / 2 - 80, yPos);
+        sctx.strokeText(sc, scrn.width / 2 - 80, yPos);
+        yPos += 30;
+        sctx.fillText(bs, scrn.width / 2 - 80, yPos);
+        sctx.strokeText(bs, scrn.width / 2 - 80, yPos);
+        yPos += 30;
+        sctx.fillText(ts, scrn.width / 2 - 80, yPos);
+        sctx.strokeText(ts, scrn.width / 2 - 80, yPos);
+        yPos += 30;
+        sctx.fillText(ac, scrn.width / 2 - 80, yPos);
+        sctx.strokeText(ac, scrn.width / 2 - 80, yPos);
         break;
     }
   },
