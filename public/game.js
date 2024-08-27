@@ -13,6 +13,15 @@ window.addEventListener('highScoreUpdated', (event) => {
   console.log('High score updated:', highScore);
 });
 
+let totalScore = 0;
+let attemptsCount = 0;
+
+window.addEventListener('statsUpdated', (event) => {
+  totalScore = event.detail.total_score;
+  attemptsCount = event.detail.attempts_count;
+  console.log('Stats updated:', totalScore, attemptsCount);
+});
+
 function resizeCanvas() {
   const windowRatio = window.innerWidth / window.innerHeight;
   const gameRatio = 414 / 736; // Original game aspect ratio
@@ -369,10 +378,16 @@ const UI = {
         sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
         let bs = `BEST  :     ${highScore}`;
+        let ts = `TOTAL :     ${totalScore}`;
+        let ac = `TRIES :     ${attemptsCount}`;
         sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
         sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
         sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
         sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
+        sctx.fillText(ts, scrn.width / 2 - 80, scrn.height / 2 + 60);
+        sctx.strokeText(ts, scrn.width / 2 - 80, scrn.height / 2 + 60);
+        sctx.fillText(ac, scrn.width / 2 - 80, scrn.height / 2 + 90);
+        sctx.strokeText(ac, scrn.width / 2 - 80, scrn.height / 2 + 90);
         break;
     }
   },

@@ -69,7 +69,7 @@ export default function Home() {
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
       .from('players')
-      .select('high_score')
+      .select('high_score, total_score, attempts_count')
       .eq('telegram_id', telegramId)
       .single();
   
@@ -77,8 +77,13 @@ export default function Home() {
       console.error('Error fetching high score:', error);
     } else if (data) {
       setHighScore(data.high_score);
-      // Add this line to dispatch an event
       window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
+      window.dispatchEvent(new CustomEvent('statsUpdated', { 
+        detail: {
+          total_score: data.total_score,
+          attempts_count: data.attempts_count
+        }
+      }));
     }
   };
   async function handlePlayerUpdate(userData: UserData, score: number) {
