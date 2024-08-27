@@ -7,10 +7,10 @@ scrn.tabIndex = 1;
 // At the beginning of the file
 let highScore = 0;
 
-// Listen for the highScoreLoaded event
-window.addEventListener('highScoreLoaded', (event) => {
+// Add this event listener
+window.addEventListener('highScoreUpdated', (event) => {
   highScore = event.detail;
-  console.log('High score loaded:', highScore);
+  console.log('High score updated:', highScore);
 });
 
 function resizeCanvas() {
@@ -442,7 +442,7 @@ async function handleGameOver() {
     const score = UI.score.curr;
     try {
       await window.upsertPlayer(score);
-      // highScore will be updated by the fetchHighScore call in upsertPlayer
+      // The high score will be updated via the 'highScoreUpdated' event
     } catch (error) {
       console.error('Error updating score:', error);
     }

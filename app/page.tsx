@@ -77,9 +77,10 @@ export default function Home() {
       console.error('Error fetching high score:', error);
     } else if (data) {
       setHighScore(data.high_score);
+      // Add this line to dispatch an event
+      window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
     }
   };
-
   async function handlePlayerUpdate(userData: UserData, score: number) {
     try {
       await upsertPlayer(userData, score);
