@@ -1,3 +1,5 @@
+// import { supabase } from '../lib/supabaseClient';
+
 const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
@@ -366,7 +368,7 @@ const UI = {
         sctx.lineWidth = "2";
         sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
-        let bs = `BEST  :     ${Math.max(this.score.curr, highScore)}`;
+        let bs = `BEST  :     ${highScore}`;
         sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
         sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
         sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
@@ -439,10 +441,8 @@ async function handleGameOver() {
     gameOverHandled = true;
     const score = UI.score.curr;
     try {
-      window.upsertPlayer(score);
-      console.log('Score updated successfully');
-      // After updating the score, we should update the highScore
-      highScore = Math.max(highScore, score);
+      await window.upsertPlayer(score);
+      // highScore will be updated by the fetchHighScore call in upsertPlayer
     } catch (error) {
       console.error('Error updating score:', error);
     }

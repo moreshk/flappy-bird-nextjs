@@ -72,7 +72,7 @@ export default function Home() {
       .select('high_score')
       .eq('telegram_id', telegramId)
       .single();
-
+  
     if (error) {
       console.error('Error fetching high score:', error);
     } else if (data) {
