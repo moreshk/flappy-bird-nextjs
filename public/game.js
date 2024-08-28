@@ -337,6 +337,7 @@ const UI = {
     curr: 0,
     best: 0,
   },
+  coinImage: new Image(),
   x: 0,
   y: 0,
   tx: 0,
@@ -369,10 +370,19 @@ const UI = {
     }
 
     // Replace the Total: text with mogul_coin image
-  let coinImage = new Image();
-  coinImage.src = "/mogul_coin.png";
-  let coinSize = 40; // Adjust this value to change the size of the coin image
-  sctx.drawImage(coinImage, scrn.width / 2 - 50, scrn.height - 92, coinSize, coinSize);
+  // let coinImage = new Image();
+  // coinImage.src = "/mogul_coin.png";
+  // Replace the Total: text with mogul_coin image
+  if (this.coinImage.complete) {
+    let coinSize = 40; // Adjust this value to change the size of the coin image
+    sctx.drawImage(this.coinImage, scrn.width / 2 - 50, scrn.height - 92, coinSize, coinSize);
+  } else {
+    // If the image hasn't loaded, draw a placeholder circle
+    sctx.beginPath();
+    sctx.arc(scrn.width / 2 - 30, scrn.height - 72, 20, 0, 2 * Math.PI);
+    sctx.fillStyle = "#FFD700";
+    sctx.fill();
+  }
   //scrn.height - 52 helps adjust vertical position
 
     // Add this block to draw the total score at the bottom
@@ -440,7 +450,7 @@ SFX.flap.src = "sfx/flap.wav";
 SFX.score.src = "sfx/score.wav";
 SFX.hit.src = "sfx/hit.wav";
 SFX.die.src = "sfx/die.wav";
-
+UI.coinImage.src = "/mogul_coin.png";
 function gameLoop() {
   update();
   draw();
