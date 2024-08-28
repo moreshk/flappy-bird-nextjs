@@ -370,11 +370,11 @@ const UI = {
     sctx.fillStyle = "#FFFFFF";
     sctx.strokeStyle = "#000000";
     sctx.lineWidth = "2";
-    sctx.font = "25px Squada One";
-    let ts = `Total Score: ${totalScore}`;
+    sctx.font = "40px Squada One";
+    let ts = `Total: ${totalScore}`;
     sctx.fillText(ts, scrn.width / 2 - 60, scrn.height - 20);
     sctx.strokeText(ts, scrn.width / 2 - 60, scrn.height - 20);
-    
+
   },
   drawScore: function () {
     sctx.fillStyle = "#FFFFFF";
