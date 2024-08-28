@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
+import Image from 'next/image';
 // Define the interface for user data
 interface UserData {
   id: number;
@@ -182,8 +182,12 @@ useEffect(() => {
   }, [highScore]);
 
   return (
-    <main className="w-full h-screen flex items-center justify-center bg-black overflow-hidden">
+    <main className="w-full h-screen flex flex-col items-center justify-center bg-black overflow-hidden relative">
       <canvas id="canvas" className="w-full h-full object-contain"></canvas>
+      {/* Upgrade icon */}
+      <a href="/upgrade" className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+        <Image src="/up_arrow.png" alt="Upgrade" width={48} height={48} />
+      </a>
       {/* Debug info - controlled by environment variable */}
       {process.env.NEXT_PUBLIC_SHOW_DEBUG === 'true' && (
         <div className="fixed top-0 left-0 bg-red-500 p-2 m-2 rounded shadow-md z-50 max-w-xs overflow-auto max-h-screen">
