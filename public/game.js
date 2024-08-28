@@ -370,7 +370,7 @@ const UI = {
   let coinImage = new Image();
   coinImage.src = "/mogul_coin.png";
   let coinSize = 40; // Adjust this value to change the size of the coin image
-  sctx.drawImage(coinImage, scrn.width / 2 - 40, scrn.height - 52, coinSize, coinSize);
+  sctx.drawImage(coinImage, scrn.width / 2 - 50, scrn.height - 52, coinSize, coinSize);
   //scrn.height - 52 helps adjust vertical position
 
     // Add this block to draw the total score at the bottom
@@ -379,8 +379,8 @@ const UI = {
     sctx.lineWidth = "2";
     sctx.font = "40px Squada One";
     let ts = `${totalScore}`;
-    sctx.fillText(ts, scrn.width / 2 + 10, scrn.height - 20);
-    sctx.strokeText(ts, scrn.width / 2 + 10, scrn.height - 20);
+    sctx.fillText(ts, scrn.width / 2, scrn.height - 20);
+    sctx.strokeText(ts, scrn.width / 2, scrn.height - 20);
 
   },
   drawScore: function () {
