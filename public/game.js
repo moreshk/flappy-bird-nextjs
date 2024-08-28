@@ -365,6 +365,16 @@ const UI = {
     if (state.curr !== state.gameOver) {
       this.drawScore();
     }
+
+    // Add this block to draw the total score at the bottom
+    sctx.fillStyle = "#FFFFFF";
+    sctx.strokeStyle = "#000000";
+    sctx.lineWidth = "2";
+    sctx.font = "25px Squada One";
+    let ts = `Total Score: ${totalScore}`;
+    sctx.fillText(ts, scrn.width / 2 - 60, scrn.height - 20);
+    sctx.strokeText(ts, scrn.width / 2 - 60, scrn.height - 20);
+    
   },
   drawScore: function () {
     sctx.fillStyle = "#FFFFFF";
@@ -435,7 +445,8 @@ function update() {
   pipe.update();
   UI.update();
   bg.update();
-  updateSpeed(); // Add this line
+  updateSpeed();
+  totalScore = window.totalScore || 0;
 }
 
 function draw() {

@@ -65,35 +65,42 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [highScore, setHighScore] = useState<number>(0);
+  const [totalScore, setTotalScore] = useState<number>(0);
 
   const fetchHighScore = async (telegramId: number) => {
-    const { data, error } = await supabase
-      .from('players')
-      .select('high_score, total_score, attempts_count')
-      .eq('telegram_id', telegramId)
-      .single();
-  
-    if (error) {
-      console.error('Error fetching high score:', error);
-    } else if (data) {
-      setHighScore(data.high_score);
-      window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
-      window.dispatchEvent(new CustomEvent('statsUpdated', { 
-        detail: {
-          total_score: data.total_score,
-          attempts_count: data.attempts_count
-        }
-      }));
-    }
-  };
-  async function handlePlayerUpdate(userData: UserData, score: number) {
-    try {
-      await upsertPlayer(userData, score);
-      await updatePlayerScores(userData.id, score);
-    } catch (error) {
-      console.error('Error updating player data:', error);
-    }
+  const { data, error } = await supabase
+    .from('players')
+    .select('high_score, total_score, attempts_count')
+    .eq('telegram_id', telegramId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching high score:', error);
+  } else if (data) {
+    setHighScore(data.high_score);
+    setTotalScore(data.total_score);
+    window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
+    window.dispatchEvent(new CustomEvent('statsUpdated', { 
+      detail: {
+        total_score: data.total_score,
+        attempts_count: data.attempts_count
+      }
+    }));
   }
+};
+async function handlePlayerUpdate(userData: UserData, score: number) {
+  try {
+    await upsertPlayer(userData, score);
+    await updatePlayerScores(userData.id, score);
+    setTotalScore(prevTotal => prevTotal + score);
+  } catch (error) {
+    console.error('Error updating player data:', error);
+  }
+}
+
+useEffect(() => {
+  window.totalScore = totalScore;
+}, [totalScore]);
 
   useEffect(() => {
     if (userData) {
