@@ -21,15 +21,18 @@ export default function Upgrade() {
   const [message, setMessage] = useState<string>('');
 
   const fetchPlayerStats = useCallback(async (telegramId: number) => {
-    try {
-      const response = await fetch(`/api/playerStats?telegramId=${telegramId}`);
-      if (!response.ok) throw new Error('Failed to fetch player stats');
-      const data = await response.json();
+    const { data, error } = await supabase
+      .from('players')
+      .select('total_score, earn_rate')
+      .eq('telegram_id', telegramId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching player stats:', error);
+    } else if (data) {
       setTotalScore(data.total_score);
       setEarnRate(data.earn_rate || 1);
       setUpgradeCost(calculateUpgradeCost(data.earn_rate || 1));
-    } catch (error) {
-      console.error('Error fetching player stats:', error);
     }
   }, []);
 
