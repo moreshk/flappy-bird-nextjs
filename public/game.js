@@ -15,11 +15,13 @@ window.addEventListener('highScoreUpdated', (event) => {
 
 let totalScore = 0;
 let attemptsCount = 0;
+let earnRate = 1;
 
 window.addEventListener('statsUpdated', (event) => {
   totalScore = event.detail.total_score;
   attemptsCount = event.detail.attempts_count;
-  console.log('Stats updated:', totalScore, attemptsCount);
+  earnRate = event.detail.earn_rate || 1;
+  console.log('Stats updated:', totalScore, attemptsCount, earnRate);
 });
 
 function resizeCanvas() {
@@ -298,7 +300,7 @@ const bird = {
           return true;
         }
       } else if (pipe.moved) {
-        UI.score.curr++;
+        UI.score.curr += earnRate;
         SFX.score.play();
         pipe.moved = false;
       }

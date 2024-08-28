@@ -68,26 +68,27 @@ export default function Home() {
   const [totalScore, setTotalScore] = useState<number>(0);
 
   const fetchHighScore = async (telegramId: number) => {
-  const { data, error } = await supabase
-    .from('players')
-    .select('high_score, total_score, attempts_count')
-    .eq('telegram_id', telegramId)
-    .single();
-
-  if (error) {
-    console.error('Error fetching high score:', error);
-  } else if (data) {
-    setHighScore(data.high_score);
-    setTotalScore(data.total_score);
-    window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
-    window.dispatchEvent(new CustomEvent('statsUpdated', { 
-      detail: {
-        total_score: data.total_score,
-        attempts_count: data.attempts_count
-      }
-    }));
-  }
-};
+    const { data, error } = await supabase
+      .from('players')
+      .select('high_score, total_score, attempts_count, earn_rate')
+      .eq('telegram_id', telegramId)
+      .single();
+  
+    if (error) {
+      console.error('Error fetching high score:', error);
+    } else if (data) {
+      setHighScore(data.high_score);
+      setTotalScore(data.total_score);
+      window.dispatchEvent(new CustomEvent('highScoreUpdated', { detail: data.high_score }));
+      window.dispatchEvent(new CustomEvent('statsUpdated', { 
+        detail: {
+          total_score: data.total_score,
+          attempts_count: data.attempts_count,
+          earn_rate: data.earn_rate || 1
+        }
+      }));
+    }
+  };
 async function handlePlayerUpdate(userData: UserData, score: number) {
   try {
     await upsertPlayer(userData, score);
