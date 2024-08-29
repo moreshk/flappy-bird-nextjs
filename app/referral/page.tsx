@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import Image from 'next/image';
 
 interface UserData {
   id: number;
@@ -19,6 +18,21 @@ export default function Referral() {
   const [referralLink, setReferralLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
+  const fetchReferralCode = async (telegramId: number) => {
+    const { data, error } = await supabase
+      .from('players')
+      .select('referral_code')
+      .eq('telegram_id', telegramId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching referral code:', error);
+      return null;
+    }
+
+    return data?.referral_code;
+  };
+
   useEffect(() => {
     const checkTelegramObject = async () => {
       if (window.Telegram && window.Telegram.WebApp) {
@@ -27,11 +41,12 @@ export default function Referral() {
         if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
           const user = webApp.initDataUnsafe.user as UserData;
           setUserData(user);
-          // Generate a simple referral code based on user ID
-          const code = `${user.id}`;
-          setReferralCode(code);
-          // Generate the referral link
-          setReferralLink(`https://t.me/MemecoinMogulBot/Play?start=${code}`);
+          
+          const code = await fetchReferralCode(user.id);
+          if (code) {
+            setReferralCode(code);
+            setReferralLink(`https://t.me/MemecoinMogulBot/Play?start=${code}`);
+          }
         }
       }
     };
