@@ -1,4 +1,4 @@
-// dummy
+// dum
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
