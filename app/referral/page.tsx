@@ -28,10 +28,10 @@ export default function Referral() {
           const user = webApp.initDataUnsafe.user as UserData;
           setUserData(user);
           // Generate a simple referral code based on user ID
-          const code = `MEMECOIN${user.id}`;
+          const code = `${user.id}`;
           setReferralCode(code);
           // Generate the referral link
-          setReferralLink(`https://t.me/memecoinmogul_bot?start=${code}`);
+          setReferralLink(`https://t.me/MemecoinMogulBot/Play?start=${code}`);
         }
       }
     };
@@ -51,15 +51,15 @@ export default function Referral() {
       <h1 className="text-4xl mb-8">Your Referral Link</h1>
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
         <p className="text-xl mb-4">Share this link with your friends:</p>
-        <div className="flex items-center justify-between bg-gray-700 p-3 rounded">
-          <span className="text-sm font-bold break-all mr-2">{referralLink}</span>
-          <button
-            onClick={copyToClipboard}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 whitespace-nowrap"
-          >
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
+        <div className="bg-gray-700 p-3 rounded mb-3">
+          <p className="text-sm font-mono break-all">{referralLink}</p>
         </div>
+        <button
+          onClick={copyToClipboard}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+        >
+          {copied ? 'Copied!' : 'Copy Link'}
+        </button>
       </div>
       <p className="mt-6 text-center text-gray-400">
         Invite friends to join MemeCoinMogul and earn rewards!
