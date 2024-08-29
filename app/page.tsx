@@ -66,7 +66,7 @@ function ClientHome() {
   const [highScore, setHighScore] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
   const searchParams = useSearchParams();
-  const referralCode = searchParams.get('ref');
+  const referralCode = searchParams.get('start');
 
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
