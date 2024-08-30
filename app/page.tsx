@@ -67,7 +67,7 @@ function ClientHome() {
   const [highScore, setHighScore] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
   const searchParams = useSearchParams();
-  const referralCode = searchParams.get('startapp');
+  const referralCode = searchParams.get('tgWebAppStartParam');
 
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
@@ -122,15 +122,11 @@ function ClientHome() {
   useEffect(() => {
     const checkTelegramObject = async () => {
       const debugMessages: string[] = [];
-      // Add more detailed debugging for the URL parameters
-      debugMessages.push(`Full URL: ${window.location.href}`);
-      debugMessages.push(`All search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
-      debugMessages.push(`Referral code (startapp): ${referralCode || 'None'}`);
-
-
-      // Add this line to get the referral code
-      debugMessages.push(`Referral code: ${referralCode || 'None'}`);
-
+            // Update these lines
+            debugMessages.push(`Full URL: ${window.location.href}`);
+            debugMessages.push(`All search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
+            debugMessages.push(`Referral code (tgWebAppStartParam): ${referralCode || 'None'}`);
+      
 
       if (window.Telegram) {
         debugMessages.push("Telegram object exists");
