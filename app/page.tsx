@@ -121,35 +121,36 @@ function ClientHome() {
   }, [userData]);
 
   useEffect(() => {
+    const debugMessages: string[] = [];
+
+    // Immediately log URL information
+    debugMessages.push(`Full URL: ${window.location.href}`);
+    debugMessages.push(`Search params: ${window.location.search}`);
+    debugMessages.push(`Hash: ${window.location.hash}`);
+
+    // Function to get referral code from various sources
+    const getReferralCode = () => {
+      const sources = [
+        { name: 'URL tgWebAppStartParam', value: searchParams.get('tgWebAppStartParam') },
+        { name: 'URL startapp', value: searchParams.get('startapp') },
+        { name: 'Telegram WebApp', value: window.Telegram?.WebApp?.initDataUnsafe?.start_param },
+        { name: 'Hash tgWebAppStartParam', value: new URLSearchParams(window.location.hash.slice(1)).get('tgWebAppStartParam') },
+        { name: 'Hash start_param', value: new URLSearchParams(window.location.hash.slice(1)).get('start_param') },
+      ];
+
+      for (const source of sources) {
+        debugMessages.push(`Checking ${source.name}: ${source.value || 'Not found'}`);
+        if (source.value) return source.value;
+      }
+
+      return null;
+    };
+
+    const code = getReferralCode();
+    setReferralCode(code);
+    debugMessages.push(`Final referral code: ${code || 'None'}`);
+
     const checkTelegramObject = async () => {
-      const debugMessages: string[] = [];
-
-      // Function to get referral code from various sources
-      const getReferralCode = () => {
-        // Check URL parameters
-        const urlParam = searchParams.get('tgWebAppStartParam');
-        if (urlParam) return urlParam;
-
-        // Check Telegram WebApp object
-        const webAppParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-        if (webAppParam) return webAppParam;
-
-        // Check if it's in the hash (for mobile devices)
-        const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const hashParam = hashParams.get('tgWebAppStartParam') || hashParams.get('start_param');
-        if (hashParam) return hashParam;
-
-        return null;
-      };
-
-      const code = getReferralCode();
-      setReferralCode(code);
-
-      debugMessages.push(`Full URL: ${window.location.href}`);
-      debugMessages.push(`URL search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
-      debugMessages.push(`URL hash: ${window.location.hash}`);
-      debugMessages.push(`Referral code: ${code || 'None'}`);
-
       if (window.Telegram) {
         debugMessages.push("Telegram object exists");
         if (window.Telegram.WebApp) {
@@ -158,6 +159,7 @@ function ClientHome() {
           const webApp = window.Telegram.WebApp;
           if (webApp.initDataUnsafe) {
             debugMessages.push("initDataUnsafe exists");
+            debugMessages.push(`initDataUnsafe: ${JSON.stringify(webApp.initDataUnsafe)}`);
             if (webApp.initDataUnsafe.user) {
               debugMessages.push("User data exists");
               const user = webApp.initDataUnsafe.user as UserData;
@@ -194,7 +196,6 @@ function ClientHome() {
         }
       } else {
         debugMessages.push("Telegram object does not exist");
-        // If Telegram object doesn't exist, check again after a short delay
         setTimeout(checkTelegramObject, 100);
       }
 
