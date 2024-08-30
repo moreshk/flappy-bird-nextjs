@@ -66,8 +66,9 @@ function ClientHome() {
   const [error, setError] = useState<string | null>(null);
   const [highScore, setHighScore] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  
   const searchParams = useSearchParams();
-  const referralCode = searchParams.get('tgWebAppStartParam');
 
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
@@ -122,11 +123,32 @@ function ClientHome() {
   useEffect(() => {
     const checkTelegramObject = async () => {
       const debugMessages: string[] = [];
-            // Update these lines
-            debugMessages.push(`Full URL: ${window.location.href}`);
-            debugMessages.push(`All search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
-            debugMessages.push(`Referral code (tgWebAppStartParam): ${referralCode || 'None'}`);
-      
+
+      // Function to get referral code from various sources
+      const getReferralCode = () => {
+        // Check URL parameters
+        const urlParam = searchParams.get('tgWebAppStartParam');
+        if (urlParam) return urlParam;
+
+        // Check Telegram WebApp object
+        const webAppParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+        if (webAppParam) return webAppParam;
+
+        // Check if it's in the hash (for mobile devices)
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const hashParam = hashParams.get('tgWebAppStartParam') || hashParams.get('start_param');
+        if (hashParam) return hashParam;
+
+        return null;
+      };
+
+      const code = getReferralCode();
+      setReferralCode(code);
+
+      debugMessages.push(`Full URL: ${window.location.href}`);
+      debugMessages.push(`URL search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
+      debugMessages.push(`URL hash: ${window.location.hash}`);
+      debugMessages.push(`Referral code: ${code || 'None'}`);
 
       if (window.Telegram) {
         debugMessages.push("Telegram object exists");
@@ -146,13 +168,13 @@ function ClientHome() {
               setIsLoading(true);
               setError(null);
               try {
-                const result = await createPlayerWithReferral(user, referralCode);
+                const result = await createPlayerWithReferral(user, code);
                 debugMessages.push("Player data saved successfully");
                 if (result.bonus_applied) {
                   debugMessages.push("Referral bonus applied");
                 }
                 // Update the total score state if needed
-                setTotalScore(prevScore => prevScore + (referralCode ? 1000 : 0));
+                setTotalScore(prevScore => prevScore + (code ? 1000 : 0));
                 await fetchHighScore(user.id);
               } catch (error) {
                 console.error('Error creating/updating player:', error);
@@ -192,7 +214,7 @@ function ClientHome() {
       document.body.appendChild(script);
       scriptLoaded.current = true;
     }
-  }, [highScore, referralCode, searchParams]);
+  }, [highScore, searchParams]);
 
   return (
     <main className="w-full h-screen flex flex-col items-center justify-center bg-black overflow-hidden relative">
