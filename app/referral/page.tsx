@@ -45,7 +45,7 @@ export default function Referral() {
           const code = await fetchReferralCode(user.id);
           if (code) {
             setReferralCode(code);
-            setReferralLink(`https://t.me/MemecoinMogulBot/Play?start=${code}`);
+            setReferralLink(`https://t.me/flappyStagingBot/flappystaging?startapp=${code}`);
           }
         }
       }
