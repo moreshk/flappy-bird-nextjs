@@ -159,3 +159,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT generate_referral_codes_for_existing_users(); 
+
+ALTER TABLE players ALTER COLUMN earn_rate SET DEFAULT 2;

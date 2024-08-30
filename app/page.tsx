@@ -23,6 +23,7 @@ declare global {
 }
 
 async function createPlayerWithReferral(userData: UserData, referralCode: string | null) {
+  console.log('Creating player with referral:', { userData, referralCode });
   const { data, error } = await supabase
     .rpc('create_player_with_referral', {
       p_username: userData.username,
