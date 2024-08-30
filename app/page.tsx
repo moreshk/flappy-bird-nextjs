@@ -67,7 +67,7 @@ function ClientHome() {
   const [highScore, setHighScore] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
   const searchParams = useSearchParams();
-  const referralCode = searchParams.get('start');
+  const referralCode = searchParams.get('startapp');
 
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
@@ -122,6 +122,10 @@ function ClientHome() {
   useEffect(() => {
     const checkTelegramObject = async () => {
       const debugMessages: string[] = [];
+
+      // Add this line to get the referral code
+      debugMessages.push(`Referral code: ${referralCode || 'None'}`);
+
 
       if (window.Telegram) {
         debugMessages.push("Telegram object exists");
