@@ -122,6 +122,11 @@ function ClientHome() {
   useEffect(() => {
     const checkTelegramObject = async () => {
       const debugMessages: string[] = [];
+      // Add more detailed debugging for the URL parameters
+      debugMessages.push(`Full URL: ${window.location.href}`);
+      debugMessages.push(`All search params: ${JSON.stringify(Object.fromEntries(searchParams))}`);
+      debugMessages.push(`Referral code (startapp): ${referralCode || 'None'}`);
+
 
       // Add this line to get the referral code
       debugMessages.push(`Referral code: ${referralCode || 'None'}`);
@@ -191,7 +196,7 @@ function ClientHome() {
       document.body.appendChild(script);
       scriptLoaded.current = true;
     }
-  }, [highScore, referralCode]);
+  }, [highScore, referralCode, searchParams]);
 
   return (
     <main className="w-full h-screen flex flex-col items-center justify-center bg-black overflow-hidden relative">
