@@ -98,6 +98,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION generate_referral_codes_for_existing_users()
+RETURNS VOID AS $$
+BEGIN
+  UPDATE players
+  SET referral_code = generate_unique_referral_code()
+  WHERE referral_code IS NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT generate_referral_codes_for_existing_users();
+
+
+-- Add the referring_code column to the players table
+ALTER TABLE players
+ADD COLUMN referring_code TEXT;
+
+-- Update the create_player_with_referral function
 CREATE OR REPLACE FUNCTION create_player_with_referral(
   p_username TEXT,
   p_first_name TEXT,
@@ -116,46 +133,58 @@ DECLARE
   new_referral_code TEXT;
   bonus_applied BOOLEAN := FALSE;
 BEGIN
+  -- Log the input parameters
+  RAISE NOTICE 'Creating player with username: %, first_name: %, last_name: %, telegram_id: %, referral_code: %',
+    p_username, p_first_name, p_last_name, p_telegram_id, p_referral_code;
+
   -- Generate a unique referral code for the new player
   SELECT generate_unique_referral_code() INTO new_referral_code;
+  RAISE NOTICE 'Generated new referral code: %', new_referral_code;
 
   -- Insert the new player
-  INSERT INTO players (username, first_name, last_name, telegram_id, referral_code, total_score)
+  INSERT INTO players (username, first_name, last_name, telegram_id, referral_code, total_score, referring_code)
   VALUES (p_username, p_first_name, p_last_name, p_telegram_id, new_referral_code,
-    CASE WHEN p_referral_code IS NOT NULL THEN 1000 ELSE 0 END)
+    CASE WHEN p_referral_code IS NOT NULL THEN 1000 ELSE 0 END,
+    p_referral_code)
   RETURNING telegram_id INTO new_player_id;
+  
+  RAISE NOTICE 'Inserted new player with telegram_id: %', new_player_id;
 
   -- If a referral code was provided, process the referral
   IF p_referral_code IS NOT NULL THEN
+    RAISE NOTICE 'Referral code provided: %', p_referral_code;
+    
     SELECT telegram_id INTO referrer_id
     FROM players
     WHERE referral_code = p_referral_code;
 
     IF referrer_id IS NOT NULL THEN
+      RAISE NOTICE 'Found referrer with telegram_id: %', referrer_id;
+      
       -- Insert the referral record
       INSERT INTO referrals (referrer_id, referred_id)
       VALUES (referrer_id, new_player_id);
+      
+      RAISE NOTICE 'Inserted referral record';
 
       -- Add bonus points to the referrer
       UPDATE players
       SET total_score = total_score + 1000
       WHERE telegram_id = referrer_id;
+      
+      RAISE NOTICE 'Updated referrer score';
 
       bonus_applied := TRUE;
+      RAISE NOTICE 'Bonus applied: %', bonus_applied;
+    ELSE
+      RAISE NOTICE 'No referrer found for code: %', p_referral_code;
     END IF;
+  ELSE
+    RAISE NOTICE 'No referral code provided';
   END IF;
 
   RETURN QUERY SELECT new_player_id, new_referral_code, bonus_applied;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION generate_referral_codes_for_existing_users()
-RETURNS VOID AS $$
-BEGIN
-  UPDATE players
-  SET referral_code = generate_unique_referral_code()
-  WHERE referral_code IS NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT generate_referral_codes_for_existing_users(); 
+ALTER TABLE players ALTER COLUMN earn_rate SET DEFAULT 2;

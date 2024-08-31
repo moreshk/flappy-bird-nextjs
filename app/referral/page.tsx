@@ -14,24 +14,8 @@ interface UserData {
 
 export default function Referral() {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [referralCode, setReferralCode] = useState<string>('');
   const [referralLink, setReferralLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
-
-  const fetchReferralCode = async (telegramId: number) => {
-    const { data, error } = await supabase
-      .from('players')
-      .select('referral_code')
-      .eq('telegram_id', telegramId)
-      .single();
-
-    if (error) {
-      console.error('Error fetching referral code:', error);
-      return null;
-    }
-
-    return data?.referral_code;
-  };
 
   useEffect(() => {
     const checkTelegramObject = async () => {
@@ -42,10 +26,8 @@ export default function Referral() {
           const user = webApp.initDataUnsafe.user as UserData;
           setUserData(user);
           
-          const code = await fetchReferralCode(user.id);
-          if (code) {
-            setReferralCode(code);
-            setReferralLink(`https://t.me/flappyStagingBot/flappystaging?startapp=${code}`);
+          if (user.username) {
+            setReferralLink(`https://t.me/flappyStagingBot/flappystaging?startapp=${user.username}`);
           }
         }
       }
