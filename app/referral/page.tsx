@@ -12,10 +12,15 @@ interface UserData {
   allows_write_to_pm?: boolean;
 }
 
+interface ReferredUser {
+  username: string;
+}
+
 export default function Referral() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [referralLink, setReferralLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
 
   useEffect(() => {
     const checkTelegramObject = async () => {
@@ -28,6 +33,7 @@ export default function Referral() {
           
           if (user.username) {
             setReferralLink(`https://t.me/flappyStagingBot/flappystaging?startapp=${user.username}`);
+            fetchReferredUsers(user.username);
           }
         }
       }
@@ -35,6 +41,19 @@ export default function Referral() {
 
     checkTelegramObject();
   }, []);
+
+  const fetchReferredUsers = async (username: string) => {
+    const { data, error } = await supabase
+      .from('referrals')
+      .select('players!referred_id(username)')
+      .eq('players.username', username);
+
+    if (error) {
+      console.error('Error fetching referred users:', error);
+    } else {
+      setReferredUsers(data.map((item: any) => ({ username: item.players.username })));
+    }
+  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink).then(() => {
@@ -46,7 +65,7 @@ export default function Referral() {
   return (
     <main className="w-full min-h-screen flex flex-col items-center justify-center bg-black text-white font-['Squada_One'] p-4">
       <h1 className="text-4xl mb-8">Your Referral Link</h1>
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md mb-8">
         <p className="text-xl mb-4">Share this link with your friends:</p>
         <div className="bg-gray-700 p-3 rounded mb-3">
           <p className="text-sm font-mono break-all">{referralLink}</p>
@@ -58,6 +77,20 @@ export default function Referral() {
           {copied ? 'Copied!' : 'Copy Link'}
         </button>
       </div>
+
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl mb-4">Users You&aposve Referred</h2>
+        {referredUsers.length > 0 ? (
+          <ul className="list-disc pl-5">
+            {referredUsers.map((user, index) => (
+              <li key={index} className="mb-2">{user.username}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-400">You haven&apost referred any users yet.</p>
+        )}
+      </div>
+
       <p className="mt-6 text-center text-gray-400">
         Invite friends to join MemeCoinMogul and earn rewards!
       </p>
