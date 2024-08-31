@@ -46,7 +46,7 @@ export default function Referral() {
     const { data, error } = await supabase
       .from('referrals')
       .select('players!referred_id(username)')
-      .eq('players.username', username);
+      .eq('players!referrer_id(username)', username);
 
     if (error) {
       console.error('Error fetching referred users:', error);
@@ -79,7 +79,7 @@ export default function Referral() {
       </div>
 
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl mb-4">Users You&aposve Referred</h2>
+        <h2 className="text-2xl mb-4">Users You Referred</h2>
         {referredUsers.length > 0 ? (
           <ul className="list-disc pl-5">
             {referredUsers.map((user, index) => (
@@ -87,7 +87,7 @@ export default function Referral() {
             ))}
           </ul>
         ) : (
-          <p className="text-gray-400">You haven&apost referred any users yet.</p>
+          <p className="text-gray-400">You have not referred any users yet.</p>
         )}
       </div>
 
