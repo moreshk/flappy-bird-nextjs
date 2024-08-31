@@ -1,4 +1,3 @@
-// dummy
 "use client";
 
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react';
@@ -20,10 +19,14 @@ declare global {
   interface Window {
     Telegram: any;
     upsertPlayer: (score: number) => Promise<void>;
+    totalScore: number;
   }
 }
 
-async function createPlayerWithReferral(userData: UserData, referralCode: string | null) {
+async function createPlayerWithReferral(userData: UserData, referralCode: string | null, addDebugMessage: (message: string) => void) {
+  addDebugMessage(`Creating player with referral code: ${referralCode}`);
+  addDebugMessage(`User data: ${JSON.stringify(userData)}`);
+
   const { data, error } = await supabase
     .rpc('create_player_with_referral', {
       p_username: userData.username,
@@ -34,10 +37,10 @@ async function createPlayerWithReferral(userData: UserData, referralCode: string
     });
 
   if (error) {
-    console.error('Error creating player:', error);
+    addDebugMessage(`Error creating player: ${error.message}`);
     throw error;
   } else {
-    console.log('Player created successfully:', data);
+    addDebugMessage(`Player created successfully: ${JSON.stringify(data)}`);
     return data;
   }
 }
@@ -69,6 +72,10 @@ function ClientHome() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   
   const searchParams = useSearchParams();
+
+  const addDebugMessage = useCallback((message: string) => {
+    setDebugInfo(prev => [...prev, message]);
+  }, []);
 
   const fetchHighScore = async (telegramId: number) => {
     const { data, error } = await supabase
@@ -121,14 +128,10 @@ function ClientHome() {
   }, [userData]);
 
   useEffect(() => {
-    const debugMessages: string[] = [];
+    addDebugMessage(`Full URL: ${window.location.href}`);
+    addDebugMessage(`Search params: ${window.location.search}`);
+    addDebugMessage(`Hash: ${window.location.hash}`);
 
-    // Immediately log URL information
-    debugMessages.push(`Full URL: ${window.location.href}`);
-    debugMessages.push(`Search params: ${window.location.search}`);
-    debugMessages.push(`Hash: ${window.location.hash}`);
-
-    // Function to get referral code from various sources
     const getReferralCode = () => {
       const sources = [
         { name: 'URL tgWebAppStartParam', value: searchParams.get('tgWebAppStartParam') },
@@ -139,7 +142,7 @@ function ClientHome() {
       ];
 
       for (const source of sources) {
-        debugMessages.push(`Checking ${source.name}: ${source.value || 'Not found'}`);
+        addDebugMessage(`Checking ${source.name}: ${source.value || 'Not found'}`);
         if (source.value) return source.value;
       }
 
@@ -147,59 +150,57 @@ function ClientHome() {
     };
 
     const code = getReferralCode();
+    addDebugMessage(`Final referral code: ${code || 'None'}`);
     setReferralCode(code);
-    debugMessages.push(`Final referral code: ${code || 'None'}`);
 
     const checkTelegramObject = async () => {
       if (window.Telegram) {
-        debugMessages.push("Telegram object exists");
+        addDebugMessage("Telegram object exists");
         if (window.Telegram.WebApp) {
-          debugMessages.push("WebApp object exists");
+          addDebugMessage("WebApp object exists");
           window.Telegram.WebApp.ready();
           const webApp = window.Telegram.WebApp;
           if (webApp.initDataUnsafe) {
-            debugMessages.push("initDataUnsafe exists");
-            debugMessages.push(`initDataUnsafe: ${JSON.stringify(webApp.initDataUnsafe)}`);
+            addDebugMessage("initDataUnsafe exists");
+            addDebugMessage(`initDataUnsafe: ${JSON.stringify(webApp.initDataUnsafe)}`);
             if (webApp.initDataUnsafe.user) {
-              debugMessages.push("User data exists");
+              addDebugMessage("User data exists");
               const user = webApp.initDataUnsafe.user as UserData;
               setUserData(user);
-              debugMessages.push("User data retrieved successfully");
+              addDebugMessage("User data retrieved successfully");
               
-              // Create or update player data
               setIsLoading(true);
               setError(null);
+
               try {
-                const result = await createPlayerWithReferral(user, code);
-                debugMessages.push("Player data saved successfully");
+                addDebugMessage(`Attempting to create player with referral code: ${code}`);
+                const result = await createPlayerWithReferral(user, code, addDebugMessage);
+                addDebugMessage("Player data saved successfully");
                 if (result.bonus_applied) {
-                  debugMessages.push("Referral bonus applied");
+                  addDebugMessage("Referral bonus applied");
                 }
-                // Update the total score state if needed
                 setTotalScore(prevScore => prevScore + (code ? 1000 : 0));
                 await fetchHighScore(user.id);
               } catch (error) {
                 console.error('Error creating/updating player:', error);
                 setError('Failed to save player data');
-                debugMessages.push("Failed to save player data");
+                addDebugMessage("Failed to save player data");
               } finally {
                 setIsLoading(false);
               }
             } else {
-              debugMessages.push("User data does not exist");
+              addDebugMessage("User data does not exist");
             }
           } else {
-            debugMessages.push("initDataUnsafe does not exist");
+            addDebugMessage("initDataUnsafe does not exist");
           }
         } else {
-          debugMessages.push("WebApp object does not exist");
+          addDebugMessage("WebApp object does not exist");
         }
       } else {
-        debugMessages.push("Telegram object does not exist");
+        addDebugMessage("Telegram object does not exist");
         setTimeout(checkTelegramObject, 100);
       }
-
-      setDebugInfo(debugMessages);
     };
 
     checkTelegramObject();
@@ -209,18 +210,16 @@ function ClientHome() {
       script.src = '/game.js';
       script.async = true;
       script.onload = () => {
-        // Dispatch a custom event with the high score
         window.dispatchEvent(new CustomEvent('highScoreLoaded', { detail: highScore }));
       };
       document.body.appendChild(script);
       scriptLoaded.current = true;
     }
-  }, [highScore, searchParams]);
+  }, [highScore, searchParams, addDebugMessage]);
 
   return (
     <main className="w-full h-screen flex flex-col items-center justify-center bg-black overflow-hidden relative">
       <canvas id="canvas" className="w-full h-full object-contain"></canvas>
-      {/* Upgrade icon */}
       <a href="/upgrade" className="absolute bottom-4 left-4 z-10">
         <Image
           src="/upgrade.png"
@@ -229,7 +228,6 @@ function ClientHome() {
           height={48}
         />
       </a>
-      {/* Referral icon */}
       <a href="/referral" className="absolute bottom-4 right-4 z-10">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -238,7 +236,6 @@ function ClientHome() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       </a>
-      {/* Debug info - controlled by environment variable */}
       {process.env.NEXT_PUBLIC_SHOW_DEBUG === 'true' && (
         <div className="fixed top-0 left-0 bg-red-500 p-2 m-2 rounded shadow-md z-50 max-w-xs overflow-auto max-h-screen">
           <p className="text-white font-bold">Debug Info:</p>
