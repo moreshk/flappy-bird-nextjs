@@ -32,13 +32,13 @@ export default function Referral() {
           setUserData(user);
           
           if (user.username) {
-            setReferralLink(`https://t.me/flappyStagingBot/flappystaging?startapp=${user.username}`);
+            setReferralLink(`${process.env.NEXT_PUBLIC_BOT_BASE_URL}?startapp=${user.username}`);
             fetchReferredUsers(user.username);
           }
         }
       }
     };
-
+  
     checkTelegramObject();
   }, []);
 
@@ -102,9 +102,6 @@ export default function Referral() {
         )}
       </div>
 
-      <p className="mt-6 text-center text-gray-400">
-        Invite friends to join MemeCoinMogul and earn rewards!
-      </p>
       
       {/* Navigation icon */}
       <div className="absolute bottom-4 left-4">
