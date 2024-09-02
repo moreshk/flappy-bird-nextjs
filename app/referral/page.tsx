@@ -43,10 +43,21 @@ export default function Referral() {
   }, []);
 
   const fetchReferredUsers = async (username: string) => {
+    const { data: referrerData, error: referrerError } = await supabase
+      .from('players')
+      .select('telegram_id')
+      .eq('username', username)
+      .single();
+
+    if (referrerError) {
+      console.error('Error fetching referrer:', referrerError);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('referrals')
       .select('players!referred_id(username)')
-      .eq('players!referrer_id(username)', username);
+      .eq('referrer_id', referrerData.telegram_id);
 
     if (error) {
       console.error('Error fetching referred users:', error);
